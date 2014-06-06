@@ -50,7 +50,12 @@ public class UnzipHelper {
     public void unzip(String zipFile, String outputFolder) {
         // windows
         if (isWindows()) {
-            antUnzip(zipFile, outputFolder);
+            try {
+                antUnzip(zipFile, outputFolder);
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+                Assume.assumeNoException(e);
+            }
             return;
         }
 
@@ -59,6 +64,7 @@ public class UnzipHelper {
         try {
             linuxUnzip(zipFile, outputFolder);
         } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
             Assume.assumeNoException(e);
         }
     }
@@ -163,17 +169,30 @@ public class UnzipHelper {
      * 
      * @param zipFile
      * @param outputFolder
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws Exception e
+     * 
+     * src:
+     *  http://stackoverflow.com/questions/5483830/process-waitfor-never-returns
      */
-    public void linuxUnzip(String zipFile, String outputFolder)
-            throws IOException, InterruptedException {
-        Process process = new ProcessBuilder("unzip", zipFile, "-d",
-                outputFolder).start();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(
-                process.getInputStream()));
-        while ((reader.readLine()) != null) {
+    public void linuxUnzip(String zipFile, String outputFolder) throws Exception {
+        try {
+            String unzipCmd = "/usr/bin/unzip";
+            String command = unzipCmd + " " + zipFile + " -d " + outputFolder + " -qq";
+            LOG.info(command);
+            Process process = new ProcessBuilder(unzipCmd, zipFile, "-d",
+                   outputFolder, "-qq").redirectErrorStream(true).start();
+            // old method // Process process = Runtime.getRuntime().exec(command);
+            BufferedReader stdOutReader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream()));
+            String line= null;
+            while ((line = stdOutReader.readLine()) != null) {
+                LOG.info(line);
+            }
+            stdOutReader.close();
+            process.waitFor();
+        } catch (Exception e) {
+            LOG.error(e.getMessage(),e);
+            throw e;
         }
-        process.waitFor(); // http://stackoverflow.com/questions/5483830/process-waitfor-never-returns
     }
 }
