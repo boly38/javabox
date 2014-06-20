@@ -16,29 +16,7 @@ import org.junit.Assume;
 
 public class UnzipHelper {
     private static Log LOG = LogFactory.getLog(UnzipHelper.class.getName());
-    private static String OS = System.getProperty("os.name").toLowerCase();
-
-    public static boolean isWindows() {
-        return (OS.indexOf("win") >= 0);
-    }
-
-    public static boolean isMac() {
-        return (OS.indexOf("mac") >= 0);
-    }
-
-    public static boolean isUnix() {
-        return (OS.indexOf("nix") >= 0 || OS.indexOf("nux") >= 0 || OS
-                .indexOf("aix") > 0);
-    }
-
-    public static boolean isSolaris() {
-        return (OS.indexOf("sunos") >= 0);
-    }
-
-    public static String getOS() {
-        return OS;
-    }
-
+    
     /**
      * unzip a file into a directory requirement: Windows OS or Linux OS
      * 
@@ -49,7 +27,7 @@ public class UnzipHelper {
      */
     public void unzip(String zipFile, String outputFolder) {
         // windows
-        if (isWindows()) {
+        if (SystemHelper.isWindows()) {
             try {
                 antUnzip(zipFile, outputFolder);
             } catch (Exception e) {
@@ -60,7 +38,7 @@ public class UnzipHelper {
         }
 
         // linux
-        Assume.assumeTrue("Only unix and windows are supported", isUnix());
+        Assume.assumeTrue("Only unix and windows are supported", SystemHelper.isUnix());
         try {
             linuxUnzip(zipFile, outputFolder);
         } catch (Exception e) {
@@ -128,10 +106,10 @@ public class UnzipHelper {
                 }
 
                 fos.close();
-                if (isUnix() && fileName.endsWith(".sh")) {
+                if (SystemHelper.isUnix() && fileName.endsWith(".sh")) {
                     newFile.setExecutable(true);
                 }
-                if (isWindows() && fileName.endsWith(".bat")) {
+                if (SystemHelper.isWindows() && fileName.endsWith(".bat")) {
                     newFile.setExecutable(true);
                 }
                 ze = zis.getNextEntry();
