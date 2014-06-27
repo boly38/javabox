@@ -1,11 +1,14 @@
 package org.internetresources.util;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
@@ -97,24 +100,19 @@ public class SeleniumHelper {
                 return isComplete;
             }
         });
-        waitForJavascript();
-    }
-
-    private void waitForJavascript() {
-        LOG.debug("javascript wait 500ms");
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-        }
     }
 
     /**
      * wait for a given text into a given web element with id=elementId
      * @param elementId
-     * @param errorMsg
+     * @param txtMsg
      */
-    public void waitUntilTextIsPresent(String elementId, String errorMsg) {
-        waitDriver.until(textIsPresent(elementId, errorMsg));
+    public void waitUntilTextIsPresent(String elementId, String txtMsg) {
+        waitDriver
+            .ignoring(NoSuchElementException.class)
+            .ignoring(StaleElementReferenceException.class)
+            .pollingEvery(2, TimeUnit.SECONDS)
+            .until(textIsPresent(elementId, txtMsg));
     }
     protected Function<WebDriver, Boolean> textIsPresent(String elementId, String text){
         final String elemId = elementId;
@@ -136,4 +134,37 @@ public class SeleniumHelper {
         };
     }
 
+    public void waitUntilClassIsPresent(String elementId, String classToBe, int customTimeoutSec) {
+        WebDriverWait customWaitDriver = new WebDriverWait(driver, customTimeoutSec);
+        customWaitDriver
+        .ignoring(NoSuchElementException.class)
+        .ignoring(StaleElementReferenceException.class)
+        .pollingEvery(5, TimeUnit.SECONDS)
+        .until(classIsPresent(elementId, classToBe));
+    }
+    public void waitUntilClassIsPresent(String elementId, String classToBe) {
+        waitDriver
+        .ignoring(NoSuchElementException.class)
+        .ignoring(StaleElementReferenceException.class)
+        .pollingEvery(2, TimeUnit.SECONDS)
+        .until(classIsPresent(elementId, classToBe));
+    }
+    protected Function<WebDriver, Boolean> classIsPresent(String elementId, String classToBe){
+        final String elemId = elementId;
+        final String clzz = classToBe;
+        return new Function<WebDriver, Boolean>() {
+            public Boolean apply(WebDriver driver) {
+                WebElement elementContainer = driver.findElement(By.id(elemId));
+                String[] elemClzzs = (elementContainer != null && elementContainer.getAttribute("class") != null) 
+                                        ? elementContainer.getAttribute("class").split(" ")
+                                        : null;
+                boolean classIsPresent = elementContainer != null
+                                     && Arrays.asList(elemClzzs).contains(clzz);
+                if (!classIsPresent) {
+                  LOG.debug("wait classIsPresent '" + clzz + "' is NOT present into #" + elemId);
+                }
+                return classIsPresent;
+            }
+        };
+    }
 }
