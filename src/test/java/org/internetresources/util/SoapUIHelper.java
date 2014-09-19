@@ -40,7 +40,21 @@ public class SoapUIHelper {
         runner.setProjectFile(soapUiXXmlFilename);
         runner.setProjectProperties(params);
         runner.setPrintReport(true);
+        runner.setJUnitReport(true);
         runner.setOutputFolder(outputFolder);
+        runner.runRunner();
+    }
+
+    public void playSoapUIProject(String soapUiXXmlFilename, String testSuiteName, String[] params, 
+            String outputFolder) throws Exception {
+        LOG.info("play SoapUI Project : " + soapUiXXmlFilename + " TestSuite " + testSuiteName);
+        SoapUITestCaseRunner runner = new SoapUITestCaseRunner();
+        runner.setProjectFile(soapUiXXmlFilename);
+        runner.setProjectProperties(params);
+        runner.setPrintReport(true);
+        runner.setJUnitReport(true);
+        runner.setOutputFolder(outputFolder);
+        runner.setTestSuite(testSuiteName);
         runner.runRunner();
     }
 

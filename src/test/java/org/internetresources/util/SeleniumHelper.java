@@ -59,23 +59,22 @@ public class SeleniumHelper {
         // time the browser should wait to find an element
         driver.manage().timeouts().implicitlyWait(MAX_WAIT_SEC, TimeUnit.SECONDS);
         SeleniumHelper seleniumHelper = new SeleniumHelper(driver, MAX_WAIT_SEC);
-        // go to the default page : assume login
+        
         seleniumHelper.navigateAndWaitAnUrl("http://127.0.0.1:9000");
-        // get login page web element (with implicitlyWait)
-        WebElement usernameField = driver.findElement(By.id("LoginUsernameId"));
-        WebElement passwordField = driver.findElement(By.id("LoginPasswordId"));
-        WebElement loginButton = driver.findElement(By.id("LoginSubmitId"));
-        // set login username and password and submit
+        WebElement usernameField = driver.findElement(By.id("LoginUsername"));
+        WebElement passwordField = driver.findElement(By.id("LoginPassword"));
+        WebElement loginButton = driver.findElement(By.id("LoginSubmit"));
+        usernameField.clear();
+        usernameField.click();
         usernameField.sendKeys("toto");
+        passwordField.clear();
+        passwordField.click();
         passwordField.sendKeys("totopwd");
         loginButton.click();
-        // wait the error using waitDriver 
         seleniumHelper.waitUntilTextIsPresent("loginNotificationDiv", "invalid username/password");
-        // close the browser
-        driver.close();
+        driver.close(); // bye bye
     }
-    
-    
+
     /**
      * navigate to a giver url and wait for the page to be ready
      * @param targetUrl
@@ -83,6 +82,23 @@ public class SeleniumHelper {
     public void navigateAndWaitAnUrl(String targetUrl) {
         LOG.info("navigate to => " + targetUrl);
         driver.get(targetUrl);
+        waitForPageLoad();
+        waitASecond(1);
+    }
+
+    public void waitASecond() {
+        waitASecond(1);
+    }
+    public void waitASecond(int sec) {
+        String action = "Wait " + sec + " second(s)";
+        LOG.info(action);
+        try {
+            Thread.sleep(sec * 1000);
+        } catch (InterruptedException e) {
+            LOG.error("error while " + action);
+        }
+    }
+    public void waitForPageLoad() {
         waitForPageLoad(maxWaitInSeconds);
     }
 
@@ -128,18 +144,24 @@ public class SeleniumHelper {
                                      && elementContainerText.contains(txt);
                 if (!textIsPresent) {
                   LOG.debug("wait textIsPresent'" + txt + "' is NOT present into #" + elemId);
+                  if (!isElementContainerDisplayed) {
+                      LOG.debug("\t#" + elemId + " not displayed");
+                  }
+                  if (elementContainerText != null) {
+                      LOG.debug("\t#" + elemId + " content:" +  elementContainerText);
+                  }
                 }
                 return textIsPresent;
             }
         };
     }
 
-    public void waitUntilClassIsPresent(String elementId, String classToBe, int customTimeoutSec) {
+    public void waitUntilClassIsPresent(String elementId, String classToBe, int customTimeoutSec, int customPollingIntervalSec) {
         WebDriverWait customWaitDriver = new WebDriverWait(driver, customTimeoutSec);
         customWaitDriver
         .ignoring(NoSuchElementException.class)
         .ignoring(StaleElementReferenceException.class)
-        .pollingEvery(5, TimeUnit.SECONDS)
+        .pollingEvery(customPollingIntervalSec, TimeUnit.SECONDS)
         .until(classIsPresent(elementId, classToBe));
     }
     public void waitUntilClassIsPresent(String elementId, String classToBe) {
@@ -155,16 +177,55 @@ public class SeleniumHelper {
         return new Function<WebDriver, Boolean>() {
             public Boolean apply(WebDriver driver) {
                 WebElement elementContainer = driver.findElement(By.id(elemId));
-                String[] elemClzzs = (elementContainer != null && elementContainer.getAttribute("class") != null) 
-                                        ? elementContainer.getAttribute("class").split(" ")
-                                        : null;
-                boolean classIsPresent = elementContainer != null
-                                     && Arrays.asList(elemClzzs).contains(clzz);
-                if (!classIsPresent) {
-                  LOG.debug("wait classIsPresent '" + clzz + "' is NOT present into #" + elemId);
-                }
-                return classIsPresent;
+                return isClassPresent(elemId, clzz, elementContainer);
             }
         };
+    }
+
+    private boolean isClassPresent(final String elemId,
+            final String clzz, WebElement elementContainer) {
+        String[] elemClzzs = (elementContainer != null && elementContainer.getAttribute("class") != null) 
+                                ? elementContainer.getAttribute("class").split(" ")
+                                : null;
+        boolean classIsPresent = elementContainer != null
+                             && Arrays.asList(elemClzzs).contains(clzz);
+        if (!classIsPresent) {
+          LOG.debug("'" + clzz + "' is NOT present into #" + elemId);
+        }
+        return classIsPresent;
+    }
+
+    public void updateInputField(String fieldId, String fieldNewValue) {
+        LOG.debug("#" + fieldId + "=" + fieldNewValue);
+        WebElement fieldToUpdate = driver.findElement(By.id(fieldId));
+        fieldToUpdate.clear();
+        fieldToUpdate.click();
+        fieldToUpdate.sendKeys(fieldNewValue);
+    }
+
+    public void clickOnElement(String elementId) {
+        LOG.debug("click #" + elementId);
+        WebElement targetElement = driver.findElement(By.id(elementId));
+        targetElement.click();
+    }
+    public void assertInputField(String inputFieldId, String expectedValue) {
+        WebElement fieldElement = driver.findElement(By.id(inputFieldId));
+        String fieldCurValue = fieldElement.getAttribute("value");
+        expectedValue = expectedValue != null ? expectedValue : "";
+        if (!expectedValue.equals(fieldCurValue)) {
+            String assertInputError = "#" + inputFieldId + " value=" + fieldCurValue + " expected=" + expectedValue;
+            LOG.error(assertInputError);
+            throw new AssertionError(assertInputError);
+        }
+    }
+    public void assertClassPresent(String elementId,
+            String expectedClassId) {
+        WebElement targetElement = driver.findElement(By.id(elementId));
+        boolean classPresent = isClassPresent(elementId, expectedClassId, targetElement);
+        if (!classPresent) {
+            String assertInputError = "#" + elementId + " class=" + expectedClassId + " expected";
+            LOG.error(assertInputError);
+            throw new AssertionError(assertInputError);
+        }
     }
 }
