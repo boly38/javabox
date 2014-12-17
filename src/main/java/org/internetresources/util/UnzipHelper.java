@@ -12,7 +12,6 @@ import java.util.zip.ZipInputStream;
 import org.apache.ant.compress.taskdefs.Unzip;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Assume;
 
 public class UnzipHelper {
     private static Log LOG = LogFactory.getLog(UnzipHelper.class.getName());
@@ -24,26 +23,29 @@ public class UnzipHelper {
      *            file to unzip
      * @param outputFolder
      *            target output directory
+     * @throws Exception 
      */
-    public void unzip(String zipFile, String outputFolder) {
+    public void unzip(String zipFile, String outputFolder) throws Exception {
         // windows
         if (SystemHelper.isWindows()) {
             try {
                 antUnzip(zipFile, outputFolder);
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
-                Assume.assumeNoException(e);
+                throw e;
             }
             return;
         }
 
         // linux
-        Assume.assumeTrue("Only unix and windows are supported", SystemHelper.isUnix());
+        if (!SystemHelper.isUnix()) {
+            throw new Exception("Only unix and windows are supported");
+        }
         try {
             linuxUnzip(zipFile, outputFolder);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
-            Assume.assumeNoException(e);
+            throw e;
         }
     }
 

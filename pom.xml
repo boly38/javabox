@@ -93,14 +93,12 @@
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
-			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.ant</groupId>
 			<artifactId>ant-compress</artifactId>
 			<version>1.2</version>
-			<scope>test</scope>
 		</dependency>
 
 		<!-- SoapUI -->
