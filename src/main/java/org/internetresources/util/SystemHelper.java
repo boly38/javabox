@@ -1,6 +1,7 @@
 package org.internetresources.util;
 
 public class SystemHelper {
+    private static final String ARCH_DATA_MODEL = System.getProperty("sun.arch.data.model");
     private static String OS = System.getProperty("os.name").toLowerCase();
 
     public static boolean isWindows() {
@@ -22,5 +23,17 @@ public class SystemHelper {
 
     public static String getOS() {
         return OS;
+    }
+
+    public static boolean is32Bits() {
+        return "32".equals(ARCH_DATA_MODEL);
+    }
+
+    public static boolean is64Bits() {
+        return "64".equals(ARCH_DATA_MODEL);
+    }
+
+    public static String getArchDataModel() {
+        return ARCH_DATA_MODEL;
     }
 }
