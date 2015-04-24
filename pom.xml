@@ -29,9 +29,9 @@
 		<build.version>${maven.build.timestamp}</build.version>
 
 		<commons-logging.version>1.1.1</commons-logging.version>
-		<junit.version>4.11</junit.version>
-		<mockito.version>1.9.5</mockito.version>
-		<festassert.version>1.4</festassert.version>
+		<junit.version>4.12</junit.version>
+		<mockito.version>2.0.2-beta</mockito.version>
+		<festassert.version>2.0M10</festassert.version>
 	</properties>
 
 	<repositories>
@@ -45,54 +45,34 @@
 		</repository>
 	</repositories>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>commons-logging</groupId>
-				<artifactId>commons-logging</artifactId>
-				<version>${commons-logging.version}</version>
-			</dependency>
-			<!-- Tests -->
-			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>${junit.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.mockito</groupId>
-				<artifactId>mockito-all</artifactId>
-				<version>${mockito.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.easytesting</groupId>
-				<artifactId>fest-assert</artifactId>
-				<version>${festassert.version}</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 
 	<dependencies>
 		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>${commons-logging.version}</version>
+		</dependency>
+		<!-- Tests -->
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<scope>test</scope>
+			<version>${junit.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<version>${mockito.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.easytesting</groupId>
 			<artifactId>fest-assert-core</artifactId>
-			<version>2.0M10</version>
+			<version>${festassert.version}</version>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>commons-net</groupId>
 			<artifactId>commons-net</artifactId>
 			<version>3.3</version>
-		</dependency>
-
-		<dependency>
-			<groupId>commons-logging</groupId>
-			<artifactId>commons-logging</artifactId>
 		</dependency>
 
 		<dependency>
@@ -106,7 +86,7 @@
 			<groupId>eviware</groupId>
 			<artifactId>maven-soapui-plugin</artifactId>
 			<version>4.5.1</version>
-			<!--  avoid conflict with selenium-java deps -->
+			<!-- avoid conflict with selenium-java deps -->
 			<exclusions>
 				<exclusion>
 					<groupId>net.sourceforge.htmlunit</groupId>
@@ -114,8 +94,8 @@
 				</exclusion>
 				<exclusion>
 					<groupId>org.apache.httpcomponents</groupId>
-    				<artifactId>httpcore</artifactId>
-    			</exclusion>
+					<artifactId>httpcore</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -142,6 +122,6 @@
 			<artifactId>htmlunit</artifactId>
 			<version>2.15</version>
 		</dependency>
-		
+
 	</dependencies>
 </project>
