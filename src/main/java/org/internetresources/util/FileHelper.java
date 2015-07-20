@@ -16,14 +16,13 @@ public class FileHelper {
         return new RandomAccessFile(file, READ_MODE);
     }
 
-    public String readStringFromFile(File file) {
-        String line = null;
+    public byte[] readByteFromFile(File file) {
         RandomAccessFile raf = null;
         try {
             raf = _getReadRandomAccessFile(file);
             byte[] buffer = new byte[(int) raf.length()];
             raf.read(buffer);
-            line = new String(buffer);
+            return buffer;
         } catch (IOException e) {
             LOG.error("IOException while reading "+ file.getAbsolutePath());
             return null;
@@ -35,7 +34,14 @@ public class FileHelper {
                 }
             }
         }
-        return line;
+    }
+
+    public String readStringFromFile(File file) {
+        byte[] buffer = readByteFromFile(file); // new byte[(int) raf.length()];
+        if (buffer == null) {
+            return null;
+        }
+        return new String(buffer);
     }
 
 }
