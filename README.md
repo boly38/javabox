@@ -3,6 +3,7 @@ JavaBox
 
 Java helper and tips
 
+* [HexAsciiConversion helper](https://github.com/boly38/javabox/blob/master/src/main/java/org/internetresources/util/HexAsciiConversion.java)
 * [File helper](https://github.com/boly38/javabox/blob/master/src/main/java/org/internetresources/util/FileHelper.java)
 * [Properties helper](https://github.com/boly38/javabox/blob/master/src/main/java/org/internetresources/util/PropertiesHelper.java)
 * [Selenium helper](https://github.com/boly38/javabox/blob/master/src/main/java/org/internetresources/util/SeleniumHelper.java)
