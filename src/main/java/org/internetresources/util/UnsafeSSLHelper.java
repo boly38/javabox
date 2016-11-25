@@ -19,7 +19,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 
 public class UnsafeSSLHelper {
-    private static Log LOG = LogFactory.getLog(SeleniumHelper.class.getName());
+    private static Log LOG = LogFactory.getLog(UnsafeSSLHelper.class.getName());
+    private static boolean warnUnsecureMode = false;
     /**
      * This method could be called before asking "https://" uri to accept any invalid ssl certificate.
      * 
@@ -40,7 +41,10 @@ public class UnsafeSSLHelper {
                     .build();
      */
     public SSLContext ignoreSSLCertif() {
-        LOG.warn("SSL Exchanges: UNSECURE mode activated");
+        if (!warnUnsecureMode) { 
+            LOG.warn("SSL Exchanges: UNSECURE mode activated");
+        }
+        warnUnsecureMode = true;
         HostnameVerifier allHostsValid = getPassiveHostnameVerifier();
         HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
         // Install the all-trusting trust manager
@@ -49,6 +53,7 @@ public class UnsafeSSLHelper {
             SSLContext.setDefault(sc);
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
         } catch (Exception e) {
+            LOG.warn(String.format("SSL Exchanges: UNSECURE mode exception : %s", e.getMessage()), e);
         }
         return sc;
     }

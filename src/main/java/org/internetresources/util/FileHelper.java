@@ -2,7 +2,10 @@ package org.internetresources.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
 
 import org.apache.commons.logging.Log;
@@ -24,7 +27,8 @@ public class FileHelper {
             raf.read(buffer);
             return buffer;
         } catch (IOException e) {
-            LOG.error("IOException while reading "+ file.getAbsolutePath());
+        	String exMsg = String.format("IOException while reading %s", file.getAbsolutePath());
+            LOG.error(exMsg);
             return null;
         } finally {
             if (raf != null) {
@@ -44,4 +48,47 @@ public class FileHelper {
         return new String(buffer);
     }
 
+    
+    // save uploaded file to a defined location on the server
+    public File saveFile(InputStream uploadedInputStream, File tempFile) {
+        OutputStream outpuStream = null;
+        try {
+            int read = 0;
+            byte[] bytes = new byte[1024];
+
+            outpuStream = new FileOutputStream(tempFile);
+            while ((read = uploadedInputStream.read(bytes)) != -1) {
+                outpuStream.write(bytes, 0, read);
+            }
+            outpuStream.flush();
+            return tempFile;
+        } catch (IOException e) {
+        	String exMsg = String.format("unable to create temp file from upload: %s", e.getMessage());
+        	LOG.error(exMsg, e);
+            if (tempFile != null && tempFile.exists()) {
+                tempFile.delete();
+            }
+            return null;
+        } finally {
+            if (outpuStream != null) {
+                try {
+                    outpuStream.close();
+                } catch (IOException e) {
+                	String excMsg = String.format("unable to close stream from upload: %s", e.getMessage());
+                	LOG.error(excMsg, e);
+                }
+            }
+        }
+    }
+
+	public void saveToFile(String fileName, byte[] fileContent) throws IOException {
+		FileOutputStream file = new FileOutputStream(fileName);
+		try {
+			if (fileContent != null) {
+				file.write(fileContent);
+			}
+		} finally {
+			file.close();			
+		}
+	}
 }
